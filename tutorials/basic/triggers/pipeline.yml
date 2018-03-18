@@ -1,24 +1,24 @@
 ---
 resources:
-- name: resource-tutorial
+- name: git-new-version
   type: git
   source:
-    uri: https://github.com/starkandwayne/concourse-tutorial.git
+    uri: https://github.com/95rade/concourse-tutorial.git
     branch: develop
 
-- name: my-timer
+- name: 30m-timer
   type: time
   source:
-    interval: 2m
+    interval: 30m
 
 jobs:
-- name: job-hello-world
+- name: TVE-system-smoke-test
   public: true
   serial: true
   plan:
-  - get: resource-tutorial
-  - get: my-timer
+  - get: git-new-version
+  - get: 30m-timer
     trigger: true
-  - task: hello-world
-    file: resource-tutorial/tutorials/basic/task-hello-world/task_hello_world.yml
+  - task: TVE-system-smoke-test
+    file: git-new-version/tutorials/basic/task-hello-world/task_hello_world.yml
 

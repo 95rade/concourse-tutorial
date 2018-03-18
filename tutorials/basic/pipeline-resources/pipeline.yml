@@ -1,15 +1,33 @@
+#---
+#resources:
+#- name: git-version
+#  type: git
+#  source:
+#    uri: https://github.com/95rade/concourse-tutorial.git
+#    branch: master
+
+#jobs:
+#- name: TVE-smoke-test
+#  public: true
+#  plan:
+#  - get: git-version
+#  - task: TVE-smoke-test
+#    file: concourse-tutorial/tutorials/basic/task-hello-world/task_hello_world.yml
+
+
 ---
 resources:
 - name: resource-tutorial
   type: git
   source:
-    uri: https://github.com/starkandwayne/concourse-tutorial.git
-    branch: develop
+    uri: https://github.com/95rade/concourse-tutorial.git
+    branch: master
 
 jobs:
 - name: job-hello-world
   public: true
   plan:
   - get: resource-tutorial
+    trigger: true
   - task: hello-world
     file: resource-tutorial/tutorials/basic/task-hello-world/task_hello_world.yml

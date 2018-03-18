@@ -1,0 +1,16 @@
+---
+resources:
+- name: git-version
+  type: git
+  source:
+    uri: https://github.com/95rade/concourse-tutorial.git
+    branch: master
+
+jobs:
+- name: TVE-smoke-test
+  public: true
+  plan:
+  - get: git-version
+  - trigger: true
+  - task: TVE-smoke-test
+#   file: concourse-tutorial/tutorials/basic/task-hello-world/task_hello_world.yml

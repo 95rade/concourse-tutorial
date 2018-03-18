@@ -1,0 +1,60 @@
+---
+resources:
+- name: version-upgrade
+  type: git
+  source:
+    uri: https://github.com/95rade/concourse-tutorial.git
+    branch: master
+- name: resource-qTest
+  type: git
+  source:
+    branch: master
+    uri:         ((publishing-outputs-gist-uri))
+    private_key: ((publishing-outputs-private-key))
+- name: every-min
+  type: time
+  source:
+    interval: 1m
+
+
+jobs:
+- name: TVE-smoke-test
+  serial: true
+  plan:
+  - get: version-upgrade
+  - get: resource-qTest
+  - get: every-min
+    trigger: true
+  - task: bump-timestamp-file
+    config:
+      platform: linux
+      image_resource:
+        type: docker-image
+        source: { repository: starkandwayne/concourse }
+      inputs:
+        - name: version-upgrade
+        - name: resource-qTest
+      outputs:
+        - name: updated-qTest
+      run:
+        path: version-upgrade/tutorials/basic/pipeline-jobs/bump-timestamp-file.sh
+  - put: resource-qTest
+    params: {repository: updated-qTest}
+
+- name: test-S8-manifest
+  plan:
+  - get: version-upgrade
+  - get: resource-qTest
+    passed: [TVE-smoke-test]
+    trigger: true
+  - task: show-date
+    config:
+      platform: linux
+      image_resource:
+        type: docker-image
+        source: {repository: busybox}
+      inputs:
+        - name: resource-qTest
+      run:
+        path: cat
+        args: [resource-qTest/bumpme]

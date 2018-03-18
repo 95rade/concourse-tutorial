@@ -1,7 +1,6 @@
 # Concourse rocks !!! You all guys rock!!!
 #
 ##### Concourse Tutorial #####
-#
 
 Learn to use https://concourse.ci with this linear sequence of tutorials. Learn each concept that builds on the previous concept.
 

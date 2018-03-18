@@ -4,7 +4,7 @@ Learn to use https://concourse-ci.org with this linear sequence of tutorials. Le
 
 Read the tutorial at https://concoursetutorial.com
 
-## Thanks
+## Thanks ##
 
 Thanks to Alex Suraci for inventing Concourse CI, and to Pivotal for sponsoring him and a team of developers to work since 2014.
 
@@ -14,6 +14,6 @@ Thanks to everyone who has worked through this tutorial and found it useful. I l
 
 Thanks for all the pull requests to help fix regressions with some Concourse versions that came out with "backwards incompatible change".
 
-## Getting Started
+## Getting Started  ##
 
 Read the tutorial at https://concoursetutorial.com

@@ -1,4 +1,3 @@
----
 resource_types:
 - name: slack-notification
   type: docker-image
@@ -13,7 +12,8 @@ resources:
 - name: new-version
   type: git
   source:
-    uri: https://github.com/95rade/concourse-tutorial.git
+    #uri: https://github.com/95rade/concourse-tutorial.git
+    url: https://github.comcast.com/VIPER-SIT/TVE-testing.git
     branch: develop
 
 jobs:

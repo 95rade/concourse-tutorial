@@ -5,7 +5,7 @@ resource_types:
     repository: cfcommunity/slack-notification-resource
 
 resources:
-- name: notify
+- name: slack-notify
   type: slack-notification
   source:
     url: ((slack-webhook))
@@ -17,7 +17,7 @@ resources:
     branch: develop
 
 jobs:
-- name: test-slack
+- name: run-sit-test
   public: true
   serial: true
   plan:
@@ -36,12 +36,12 @@ jobs:
       run:
         path: new-version/tutorials/miscellaneous/slack-notifications/test-sometimes-works-notify-message.sh
     on_success:
-      put: notify
+      put: slack-notify
       params:
         text_file: notify_message/message
         silent: true
     on_failure:
-      put: notify
+      put: slack-notify
       params:
         text_file: notify_message/message
         silent: true

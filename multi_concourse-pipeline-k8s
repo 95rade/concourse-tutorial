@@ -1,0 +1,189 @@
+8. Concourse Pipeline (Kubernetes)
+Prev 	Part I. Spring Cloud Pipelines	 Next
+8. Concourse Pipeline (Kubernetes)
+[Important]	Important
+In this chapter, we assume that you deploy your application to Kubernetes PaaS
+
+The Spring Cloud Pipelines repository contains opinionated Concourse pipeline definitions. Those jobs form an empty pipeline and an opinionated sample pipeline that you can use in your company.
+
+The following projects take part in the microservice setup for this demo:
+
+Github Analytics: The application that has a REST endpoint and uses messaging — part of our business application.
+Github Webhook: Project that emits messages that are used by Github Analytics — part of our business application.
+Eureka: Simple Eureka Server. This is an infrastructure application.
+Github Analytics Stub Runner Boot: Stub Runner Boot server to be used for tests with Github Analytics and uses Eureka and Messaging. This is an infrastructure application.
+8.1 Step-by-step
+If you want only to run the demo as far as possible by using PCF Dev and Docker Compose, do the following:
+
+Fork repos
+Start Concourse and Artifactory
+Setup the fly CLI
+Setup your credentials.yml
+Setup the pipeline
+Run the github-webhook pipeline
+8.1.1 Fork Repositories
+Four applications compose the pipeline:
+
+Github Webhook
+Github Analytics
+Github Eureka
+Github Stub Runner Boot
+You need to fork only the following repositories, because only then can you tag and push the tag to the repository:
+
+Github Webhook
+Github Analytics
+8.2 Concourse in K8S (Kubernetes)
+The simplest way to deploy Concourse to K8S is to use Helm. Once you have Helm installed and your kubectl is pointing to the cluster, run the following command to install the Concourse cluster in your K8S cluster:
+
+$ helm install stable/concourse --name concourse
+Once the script is done, you should see the following output
+
+1. Concourse can be accessed:
+
+  * Within your cluster, at the following DNS name at port 8080:
+
+    concourse-web.default.svc.cluster.local
+
+  * From outside the cluster, run these commands in the same shell:
+
+    export POD_NAME=$(kubectl get pods --namespace default -l "app=concourse-web" -o jsonpath="{.items[0].metadata.name}")
+    echo "Visit http://127.0.0.1:8080 to use Concourse"
+    kubectl port-forward --namespace default $POD_NAME 8080:8080
+
+2. Login with the following credentials
+
+  Username: concourse
+  Password: concourse
+Follow the steps and log in to Concourse under http://127.0.0.1:8080.
+
+8.2.1 Deploying Artifactory to K8S
+You can use Helm also to deploy Artifactory to K8S, as follows:
+
+$ helm install --name artifactory --set artifactory.image.repository=docker.bintray.io/jfrog/artifactory-oss stable/artifactory
+After you run this command, you should see the following output:
+
+NOTES:
+Congratulations. You have just deployed JFrog Artifactory Pro!
+
+1. Get the Artifactory URL by running these commands:
+
+   NOTE: It may take a few minutes for the LoadBalancer IP to be available.
+         You can watch the status of the service by running 'kubectl get svc -w nginx'
+   export SERVICE_IP=$(kubectl get svc --namespace default nginx -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
+   echo http://$SERVICE_IP/
+
+2. Open Artifactory in your browser
+   Default credential for Artifactory:
+   user: admin
+   password: password
+Next, you need to set up the repositories.
+
+First, access the Artifactory URL and log in with a user name of admin and a password of password.
+
+Figure 8.1. Click on Quick Setup
+
+artifactory quick setup
+
+Then, click on Maven setup and click Create.
+
+Figure 8.2. Create the Maven Repository
+
+artifactory maven repo
+
+8.2.2 Setup the fly CLI
+If you go to the Concourse website you should see something resembling the following:
+
+running concourse
+You can click one of the icons (depending on your OS) to download fly, which is the Concourse CLI. Once you download that (and maybe added it to your PATH, depending on your OS) you can run the following command:
+
+fly --version
+If fly is properly installed, it should print out the version.
+
+8.2.3 Setup your credentials.yml
+We made a sample credentials file called credentials-sample-k8s.yml prepared for k8s. You can use it as a base for your credentials.yml.
+
+To allow the Concourse worker’s spawned container to connect to the Kubernetes cluster, you must pass the CA contents and the auth token.
+
+To get the contents of CA for GCE, run the following command:
+
+$ kubectl get secret $(kubectl get secret | grep default-token | awk '{print $1}') -o jsonpath='{.data.ca\.crt}' | base64 --decode
+To get the auth token, run the following command:
+
+$ kubectl get secret $(kubectl get secret | grep default-token | awk '{print $1}') -o jsonpath='{.data.token}' | base64 --decode
+Set that value under paas-test-client-token, paas-stage-client-token, and paas-prod-client-token
+
+8.2.4 Build the pipeline
+After running Concourse, you should get the following output in your terminal:
+
+$ export POD_NAME=$(kubectl get pods --namespace default -l "app=concourse-web" -o jsonpath="{.items[0].metadata.name}")
+$ echo "Visit http://127.0.0.1:8080 to use Concourse"
+$ kubectl port-forward --namespace default $POD_NAME 8080:8080
+Visit http://127.0.0.1:8080 to use Concourse
+Log in (for example, for Concourse running at 127.0.0.1 — if you do not provide any value, localhost is assumed). If you run this script, it assumes that either fly is on your PATH or that it is in the same folder as the script:
+
+$ fly -t k8s login -c http://localhost:8080 -u concourse -p concourse
+Next, run the following command to create the pipeline:
+
+$ ./set_pipeline.sh github-webhook k8s credentials-k8s.yml
+8.2.5 Run the github-webhook Pipeline
+The following images show the various steps involved in runnig the github-webhook pipeline:
+
+   
+
+Figure 8.3. Click Login
+
+concourse login
+
+   
+
+Figure 8.4. Pick main team
+
+concourse team main
+
+   
+
+Figure 8.5. Log in with concourse user and concourse password
+
+concourse user pass
+
+   
+
+Figure 8.6. Your screen should look more or less like this
+
+concourse pipeline
+
+   
+
+Figure 8.7. Unpause the pipeline by clicking in the top lefr corner and then clicking the play button
+
+start pipeline
+
+   
+
+Figure 8.8. Click 'generate-version'
+
+generate version
+
+   
+
+Figure 8.9. Click + sign to start a new build
+
+run pipeline
+
+   
+
+Figure 8.10. The job is pending
+
+concourse pending
+
+   
+
+Figure 8.11. Job is pending in the main screen
+
+job running
+
+   
+
+Figure 8.12. Job is running in the main screen
+
+running pipeline
